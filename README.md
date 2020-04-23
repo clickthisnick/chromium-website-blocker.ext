@@ -1,0 +1,1 @@
+# chromium-website-blocker.ext
