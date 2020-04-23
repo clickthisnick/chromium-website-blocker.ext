@@ -1,0 +1,13 @@
+{
+  "name": "WebsiteBlocker",
+  "description": "Simple Website Blocker",
+  "background": {
+    "page": "block.html"
+  },
+  "permissions": [
+    "tabs",
+    "*://*/*"
+  ],
+  "version": "0.0.1",
+  "manifest_version": 2
+}
