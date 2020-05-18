@@ -14,10 +14,31 @@ function toggleUrl(url) {
     if (boolString === 'true') {
         document.getElementById(url).value = "Enable"
         localStorage.setItem(url, 'false')
+
+        // Enable for 5 minutes then redisable
+        startTimer(60 * 5, url)
     } else {
         localStorage.setItem(url, 'true')
         document.getElementById(url).value = "Disable"
     }
+}
+
+function startTimer(duration, url) {
+    var timer = duration, minutes, seconds;
+    var enableTimer = setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        console.log(minutes + ":" + seconds);
+
+        if (--timer < 0) {
+            toggleUrl(url)
+            clearInterval(enableTimer);
+        }
+    }, 1000);
 }
 
 function init() {
