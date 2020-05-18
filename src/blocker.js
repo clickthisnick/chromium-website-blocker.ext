@@ -8,6 +8,8 @@ const blockedList = [
 ]
 
 function toggleUrl(url) {
+    console.log(`toggle ${url}`)
+
     let boolString = localStorage.getItem(url)
     if (boolString === 'true') {
         document.getElementById(url).value = "Enable"
@@ -19,25 +21,39 @@ function toggleUrl(url) {
 }
 
 function init() {
-    const div = document.getElementById('sites');
-    blockedList.forEach((url) => {
+    const handlers = {}
+    let div = document.getElementById('sites');
+
+    for(i = 0; i < blockedList.length; i++) {
+        let url = blockedList[i]
 
         // set item in local storage
         // local storage has string values
         const boolString = localStorage.getItem(url)
         if (boolString === null) {
             localStorage.setItem(url, "true")
+        } else {
+            const text = boolString === "true" ? "Disable" : "Enable"
+            div.innerHTML += "<br>"
+            div.innerHTML += "<br>"
+            div.innerHTML += url
+            div.innerHTML += `<input id="${url}" type="button" value="${text}"></input>`
+
         }
+    }
 
-        const text = boolString === "true" ? "Disable" : "Enable"
+    for(i = 0; i < blockedList.length; i++) {
+        let url = blockedList[i]
 
-        div.innerHTML += "<br>"
-        div.innerHTML += url
-        div.innerHTML += `<input id="${url}" type="button" value="${text}" />`
+        const boolString = localStorage.getItem(url)
 
-        let btn1 = document.getElementById(url);
-        btn1.addEventListener("click", function(){toggleUrl(url)});
-    })
+        if (boolString !== null) {
+            handlers[url] = document.getElementById(url);
+            handlers[url].addEventListener("click", function(){toggleUrl(url)});
+        }
+    }
+ 
+    console.log(handlers)
 }
 
 function run(tab) {
@@ -55,7 +71,7 @@ function run(tab) {
             // Make sure its true in local storage
             const urlValue = localStorage.getItem(url)
 
-            if (urlValue !== null && urlValue !== "false") {
+            if (urlValue !== "false") {
                 const redirect = chrome.extension.getURL('blocked.html') + '?url=' + encodeURIComponent(url);
 
                 chrome.tabs.update(tab.id, { url: redirect });
