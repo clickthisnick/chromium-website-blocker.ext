@@ -7,38 +7,32 @@ const blockedList = [
     "example.com",
 ]
 
+// 60000 milliseconds in 1 minute
+// 300000 milliseconds in 5 minutes
+// 900000 milliseconds in 15 minutes
+const millisecondsLimit = 300000
+
+function getMillisecondTime(pastMilliseconds = 0) {
+    let date = new Date();
+    return String(date.getTime() - pastMilliseconds);
+}
+
+function isAboveThreshold(millisecondString) {
+    return getMillisecondTime() - parseInt(millisecondString) > millisecondsLimit
+}
+
 function toggleUrl(url) {
     console.log(`toggle ${url}`)
 
-    let boolString = localStorage.getItem(url)
-    if (boolString === 'true') {
+    let dateString = localStorage.getItem(url)
+
+    if (isAboveThreshold(dateString)) {
+        localStorage.setItem(url, getMillisecondTime())
         document.getElementById(url).value = "Enable"
-        localStorage.setItem(url, 'false')
-
-        // Enable for 5 minutes then redisable
-        startTimer(60 * 5, url)
     } else {
-        localStorage.setItem(url, 'true')
-        document.getElementById(url).value = "Disable"
+        localStorage.setItem(url, getMillisecondTime(300000))
+        document.getElementById(url).value = "Disable" 
     }
-}
-
-function startTimer(duration, url) {
-    var timer = duration, minutes, seconds;
-    var enableTimer = setInterval(function () {
-        minutes = parseInt(timer / 60, 10);
-        seconds = parseInt(timer % 60, 10);
-
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-        seconds = seconds < 10 ? "0" + seconds : seconds;
-
-        console.log(minutes + ":" + seconds);
-
-        if (--timer < 0) {
-            toggleUrl(url)
-            clearInterval(enableTimer);
-        }
-    }, 1000);
 }
 
 function init() {
@@ -50,11 +44,11 @@ function init() {
 
         // set item in local storage
         // local storage has string values
-        const boolString = localStorage.getItem(url)
-        if (boolString === null) {
-            localStorage.setItem(url, "true")
+        const millisecondsString = localStorage.getItem(url)
+        if (millisecondsString === null) {
+            localStorage.setItem(url, getMillisecondTime(300000))
         } else {
-            const text = boolString === "true" ? "Disable" : "Enable"
+            const text = isAboveThreshold(millisecondsString) ? "Disable" : "Enable"
             div.innerHTML += "<br>"
             div.innerHTML += "<br>"
             div.innerHTML += url
@@ -92,7 +86,7 @@ function run(tab) {
             // Make sure its true in local storage
             const urlValue = localStorage.getItem(url)
 
-            if (urlValue !== "false") {
+            if (isAboveThreshold(urlValue)) {
                 const redirect = chrome.extension.getURL('blocked.html') + '?url=' + encodeURIComponent(url);
 
                 chrome.tabs.update(tab.id, { url: redirect });
