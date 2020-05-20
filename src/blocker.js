@@ -55,10 +55,12 @@ function generateHtml(tab) {
 
     let url = tab.url.split('blocked.html?url=')
     if (url.length === 1){ 
-        url = extractDomain(url[0])
+        url = url[0]
     } else {
         url = url[1]
     }
+
+    url = extractDomain(url)
 
     const millisecondsString = localStorage.getItem(url)
     const text = isAboveThreshold(millisecondsString) ? "Disable" : "Enable"
