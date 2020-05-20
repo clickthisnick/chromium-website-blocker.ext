@@ -36,9 +36,7 @@ function toggleUrl(url) {
 }
 
 function init() {
-    const handlers = {}
-    let div = document.getElementById('sites');
-
+    // Disable sites to begin with
     for(i = 0; i < blockedList.length; i++) {
         let url = blockedList[i]
 
@@ -47,28 +45,29 @@ function init() {
         const millisecondsString = localStorage.getItem(url)
         if (millisecondsString === null) {
             localStorage.setItem(url, getMillisecondTime(300000))
-        } else {
-            const text = isAboveThreshold(millisecondsString) ? "Disable" : "Enable"
-            div.innerHTML += "<br>"
-            div.innerHTML += "<br>"
-            div.innerHTML += url
-            div.innerHTML += `<input id="${url}" type="button" value="${text}"></input>`
-
         }
+     }
+}
+
+function generateHtml(tab) {
+    // Generate html, but hide website names so you dont get influenced to click a different site
+    const div = document.getElementById('sites');
+
+    let url = tab.url.split('blocked.html?url=')
+    if (url.length === 1){ 
+        url = extractDomain(url[0])
+    } else {
+        url = url[1]
     }
 
-    for(i = 0; i < blockedList.length; i++) {
-        let url = blockedList[i]
+    const millisecondsString = localStorage.getItem(url)
+    const text = isAboveThreshold(millisecondsString) ? "Disable" : "Enable"
+    div.innerHTML += "<br>"
+    div.innerHTML += "Current Site:"
+    div.innerHTML += `<input id="${url}" type="button" value="${text}"></input>`
+    div.innerHTML += "<br>"
 
-        const boolString = localStorage.getItem(url)
-
-        if (boolString !== null) {
-            handlers[url] = document.getElementById(url);
-            handlers[url].addEventListener("click", function(){toggleUrl(url)});
-        }
-    }
- 
-    console.log(handlers)
+    document.getElementById(url).addEventListener("click", function(){toggleUrl(url)});
 }
 
 function run(tab) {
@@ -116,3 +115,8 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 });
 
 init()
+
+chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+    generateHtml(tabs[0]);
+    // use `url` here inside the callback because it's asynchronous!
+});
