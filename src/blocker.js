@@ -7,6 +7,11 @@ const blockedList = [
     "example.com",
 ]
 
+// Urls to never block even tho the domain itself might be blocked
+const whiteList = [
+    "http://example.com/foo",
+]
+
 // 60000 milliseconds in 1 minute
 // 300000 milliseconds in 5 minutes
 // 900000 milliseconds in 15 minutes
@@ -84,6 +89,13 @@ function run(tab) {
 
     blockedList.forEach((url) => {
         if (currentDomain === url) {
+
+            for (i = 0; i < whiteList.length; i++) {
+                if (tab.url.startsWith(whiteList[i])) {
+                    return;
+                }
+            }
+
             // Make sure its true in local storage
             const urlValue = localStorage.getItem(url)
 
