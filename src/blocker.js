@@ -8,9 +8,7 @@ const blockedList = [
 ]
 
 // Urls to never block even tho the domain itself might be blocked
-const whiteList = [
-    "http://example.com/foo",
-]
+const allowedList = []
 
 // 60000 milliseconds in 1 minute
 // 300000 milliseconds in 5 minutes
@@ -26,17 +24,21 @@ function isAboveThreshold(millisecondString) {
     return getMillisecondTime() - parseInt(millisecondString) > millisecondsLimit
 }
 
-function toggleUrl(url) {
+function toggleUrl(url, inputText) {
     console.log(`toggle ${url}`)
 
-    let dateString = localStorage.getItem(url)
-
-    if (isAboveThreshold(dateString)) {
-        localStorage.setItem(url, getMillisecondTime())
-        document.getElementById(url).value = "Enable"
+    if (document.getElementById("input").value != inputText) {
+        console.log('Wrong Input Text')
     } else {
-        localStorage.setItem(url, getMillisecondTime(300000))
-        document.getElementById(url).value = "Disable" 
+        let dateString = localStorage.getItem(url)
+
+        if (isAboveThreshold(dateString)) {
+            localStorage.setItem(url, getMillisecondTime())
+            document.getElementById(url).value = "Enable"
+        } else {
+            localStorage.setItem(url, getMillisecondTime(300000))
+            document.getElementById(url).value = "Disable" 
+        }
     }
 }
 
@@ -69,12 +71,13 @@ function generateHtml(tab) {
 
     const millisecondsString = localStorage.getItem(url)
     const text = isAboveThreshold(millisecondsString) ? "Disable" : "Enable"
-    div.innerHTML += "<br>"
-    div.innerHTML += "Current Site:"
+    const enterText = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    div.innerHTML += "Enter This String:<br>"
+    div.innerHTML += `${enterText}<br>`
+    div.innerHTML += `<input id="input" type="input" value=""></input><br>`
     div.innerHTML += `<input id="${url}" type="button" value="${text}"></input>`
-    div.innerHTML += "<br>"
 
-    document.getElementById(url).addEventListener("click", function(){toggleUrl(url)});
+    document.getElementById(url).addEventListener("click", function(){toggleUrl(url, enterText)});
 }
 
 function run(tab) {
@@ -90,8 +93,8 @@ function run(tab) {
     blockedList.forEach((url) => {
         if (currentDomain === url) {
 
-            for (i = 0; i < whiteList.length; i++) {
-                if (tab.url.startsWith(whiteList[i])) {
+            for (i = 0; i < allowedList.length; i++) {
+                if (tab.url.startsWith(allowedList[i])) {
                     return;
                 }
             }
