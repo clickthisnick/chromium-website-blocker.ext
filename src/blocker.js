@@ -7,8 +7,14 @@ const blockedList = [
     "example.com",
 ]
 
+const today = new Date();
+const dd = String(today.getDate()).padStart(2, '0');
+const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+const yyyy = today.getFullYear();
+
 // Urls to never block even tho the domain itself might be blocked
 const allowedList = []
+const unlockCounterVar = `chromium-website-blocker-counter-${mm}-${dd}-${yyyy}`
 
 // 60000 milliseconds in 1 minute
 // 300000 milliseconds in 5 minutes
@@ -31,6 +37,12 @@ function toggleUrl(url, inputText) {
         console.log('Wrong Input Text')
     } else {
         let dateString = localStorage.getItem(url)
+        let counter = localStorage.getItem(unlockCounterVar)
+        let counterInt = Number(counter)
+        counterInt++
+        localStorage.setItem(unlockCounterVar, counterInt)
+
+        document.getElementById("counter").text = counterInt
 
         if (isAboveThreshold(dateString)) {
             localStorage.setItem(url, getMillisecondTime())
@@ -73,9 +85,20 @@ function generateHtml(tab) {
     const text = isAboveThreshold(millisecondsString) ? "Disable" : "Enable"
     const enterText = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     div.innerHTML += "Enter This String:<br>"
-    div.innerHTML += `${enterText}<br>`
+    div.innerHTML += `${enterText}<br><br>`
     div.innerHTML += `<input id="input" type="input" value=""></input><br>`
-    div.innerHTML += `<input id="${url}" type="button" value="${text}"></input>`
+    div.innerHTML += `<input id="${url}" type="button" value="${text}"></input><br><br>`
+    div.innerHTML += `You've unlocked <span id="counter"></span> times today.<br><span id="counterWastedTime">`
+
+    // Set our timer counter
+    const unlockCounterString = localStorage.getItem(unlockCounterVar)
+    if (unlockCounterString === null) {
+        localStorage.setItem(unlockCounterVar, 0)
+        document.getElementById('counter').innerText = "0";
+    } else {
+        document.getElementById('counter').innerText = unlockCounterString;
+        document.getElementById('counterWastedTime').innerText = `Wasting ${Number(unlockCounterString) * 5} minutes`
+    }
 
     document.getElementById(url).addEventListener("click", function(){toggleUrl(url, enterText)});
 }
