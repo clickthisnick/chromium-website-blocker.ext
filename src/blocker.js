@@ -102,7 +102,10 @@ function generateHtml(tab) {
     const text = isAboveThreshold(millisecondsString) ? "Disable" : "Enable"
     const enterText = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     div.innerHTML += "Enter This String:<br>"
-    div.innerHTML += `${enterText}<br><br>`
+    for (i = 0; i < enterText.length; i++) {
+        div.innerHTML += `<span>${enterText[i]}</span>`
+    }
+    div.innerHTML += `<br><br>`
     div.innerHTML += `<input id="input" type="input" value=""></input><br>`
     div.innerHTML += `<input id="${url}" type="button" value="${text}"></input><br><br>`
     div.innerHTML += `You've unlocked <span id="counter"></span> times today.<br><span id="counterWastedTime">`
