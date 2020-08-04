@@ -2,18 +2,35 @@ function extractDomain(url) {
     return url.replace(/^(?:https?:\/\/)?(?:[^\/]+\.)?([^.\/]+\.[^.\/]+).*$/, "$1");
 }
 
+// Urls to never block even tho the domain itself might be blocked
+// Can be a full url like https://an.example.com
+const allowedList = [
+
+]
+const allowedSet = new Set(allowedList)
+
 // List of domains to block
+// Must be just the domain (example.com not an.example.com)
+// You will need to allow specific subdomains or queries within a blocked domain
 const blockedList = [
     "example.com",
 ]
+const blockedSet = new Set(blockedList)
+
+// Urls that are allowed as long as you have another tab open with a specific url.
+// Usecase is lets say you only want to allow music sites if you are also on github
+// Value is used with startsWith() so can be a full url like https://an.example.com
+// Key is an exact match
+const allowedIfAlsoHaveAnotherTabOpen = {
+    "http://www.example.com/": "https://github.com/"
+}
 
 const today = new Date();
 const dd = String(today.getDate()).padStart(2, '0');
 const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
 const yyyy = today.getFullYear();
 
-// Urls to never block even tho the domain itself might be blocked
-const allowedList = []
+
 const unlockCounterVar = `chromium-website-blocker-counter-${mm}-${dd}-${yyyy}`
 
 // 60000 milliseconds in 1 minute
@@ -48,7 +65,7 @@ function toggleUrl(url, inputText) {
             localStorage.setItem(url, getMillisecondTime())
             document.getElementById(url).value = "Enable"
         } else {
-            localStorage.setItem(url, getMillisecondTime(300000))
+            localStorage.setItem(url, getMillisecondTime(millisecondsLimit))
             document.getElementById(url).value = "Disable" 
         }
     }
@@ -63,7 +80,7 @@ function init() {
         // local storage has string values
         const millisecondsString = localStorage.getItem(url)
         if (millisecondsString === null) {
-            localStorage.setItem(url, getMillisecondTime(300000))
+            localStorage.setItem(url, getMillisecondTime(millisecondsLimit))
         }
      }
 }
@@ -103,32 +120,47 @@ function generateHtml(tab) {
     document.getElementById(url).addEventListener("click", function(){toggleUrl(url, enterText)});
 }
 
-function run(tab) {
+function run(tabs) {
+    
+    const tabUrls = tabs.map((tab) => {
+        return tab.url
+    })
 
-    // Skip any tab that is not on a url
-    if (tab.url.search(/https?:/) !== 0) {
-        return;
-    };
+    tabs.forEach((tab) => {
+        // Skip any tab that is not on a url
+        if (tab.url.search(/https?:/) !== 0) {
+            return;
+        };
 
-    // Get the current domain of the tab
-    const currentDomain = extractDomain(tab.url)
+        // Get the current domain of the tab
+        const currentDomain = extractDomain(tab.url)
 
-    blockedList.forEach((url) => {
-        if (currentDomain === url) {
-
+        if (blockedSet.has(currentDomain)) {
+            // Skip blocking if the url is in the allowedList
             for (i = 0; i < allowedList.length; i++) {
                 if (tab.url.startsWith(allowedList[i])) {
                     return;
                 }
             }
 
+            // Skip blocking if any tab is open that allows this url
+            if (tab.url in allowedIfAlsoHaveAnotherTabOpen) {
+                const tabUrlThatMustAlsoBeOpen = allowedIfAlsoHaveAnotherTabOpen[tab.url]
+                for (i = 0; i < tabUrls.length; i++) {
+                    if (tabUrls[i].startsWith(tabUrlThatMustAlsoBeOpen)) {
+                        return;
+                    }
+                }
+            }
+
             // Make sure its true in local storage
-            const urlValue = localStorage.getItem(url)
+            const urlValue = localStorage.getItem(currentDomain)
 
             if (isAboveThreshold(urlValue)) {
-                const redirect = chrome.extension.getURL('blocked.html') + '?url=' + encodeURIComponent(url);
+                const redirect = chrome.extension.getURL('blocked.html') + '?url=' + encodeURIComponent(currentDomain);
 
                 chrome.tabs.update(tab.id, { url: redirect });
+
                 return;
             }
         }
@@ -138,19 +170,25 @@ function run(tab) {
 }
 
 chrome.tabs.onCreated.addListener(function(tab) {
-    run(tab);
+    chrome.tabs.getAllInWindow(tab.windowId, function(tabs) {
+        run(tabs)    
+    })
 });
 
 chrome.tabs.onActivated.addListener(function(info) {
     chrome.tabs.get(info.tabId, function(tab) {
-        run(tab);
+        chrome.tabs.getAllInWindow(tab.windowId, function(tabs) {
+            run(tabs)    
+        })
     });
 });
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status === 'loading') {
-        run(tab);
-        return;
+        chrome.tabs.getAllInWindow(tab.windowId, function(tabs) {
+            run(tabs)    
+            return
+        })
     }
 });
 
