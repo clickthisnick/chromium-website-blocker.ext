@@ -15,17 +15,19 @@ const allowedSet = new Set(allowedList)
 const blockedListDomains = [
     "example.com",
 ]
-
-const blockedListFull = [
-
-]
 const blockedSet = new Set(blockedListDomains)
 
 // Urls that are allowed as long as you have another tab open with a specific url.
 // Usecase is lets say you only want to allow music sites if you are also on github
 // Value is used with startsWith() so can be a full url like https://an.example.com
 // Key is an exact match
-const allowedIfAlsoHaveAnotherTabOpen = {}
+const allowedIfAlsoHaveAnotherTabOpen = {
+    "http://www.example.com/": "https://github.com/"
+}
+
+const blockedListFull = [
+
+]
 
 const today = new Date();
 const dd = String(today.getDate()).padStart(2, '0');
@@ -183,7 +185,6 @@ function run(tabs) {
                     }
                 }
             }
-
             block(currentDomain, tab.id)
         }
 
