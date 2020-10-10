@@ -4,28 +4,28 @@ function extractDomain(url) {
 
 // Urls to never block even tho the domain itself might be blocked
 // Can be a full url like https://an.example.com
-const allowedList = [
-
-]
-const allowedSet = new Set(allowedList)
+const alwaysAllowStartsWithUrl = []
 
 // List of domains to block
 // Must be just the domain (example.com not an.example.com)
 // You will need to allow specific subdomains or queries within a blocked domain
-const blockedListDomains = [
+const blockedDomains = [
     "example.com",
 ]
-const blockedSet = new Set(blockedListDomains)
 
 // Urls that are allowed as long as you have another tab open with a specific url.
 // Usecase is lets say you only want to allow music sites if you are also on github
 // Value is used with startsWith() so can be a full url like https://an.example.com
 // Key is an exact match
-const allowedIfAlsoHaveAnotherTabOpen = {
-    "http://www.example.com/": "https://github.com/"
-}
+// const allowedIfAlsoHaveAnotherTabOpen = {
+//     "http://www.example.com/": "https://github.com/"
+// }
 
-const blockedListFull = [
+const blockedStartsWithUrl = [
+
+]
+
+const blockAllTabsIfUrlOpen = [
 
 ]
 
@@ -49,18 +49,6 @@ function getMillisecondTime(pastMilliseconds = 0) {
 
 function isAboveThreshold(millisecondString) {
     return getMillisecondTime() - parseInt(millisecondString) > millisecondsLimit
-}
-
-function urlStartsWith(tabUrl) {
-    for (let blockIdx = 0; blockIdx < blockedListFull.length; blockIdx++) {
-        let url = blockedListFull[blockIdx];
-
-        if (tabUrl.startsWith(url)) {
-            return url;
-        }
-    }
-
-    return false;
 }
 
 function toggleUrl(url, inputText) {
@@ -87,9 +75,21 @@ function toggleUrl(url, inputText) {
     }
 }
 
+function urlStartsWith(tabUrl) {
+    for (let blockIdx = 0; blockIdx < blockedStartsWithUrl.length; blockIdx++) {
+        let url = blockedStartsWithUrl[blockIdx];
+
+        if (tabUrl.startsWith(url)) {
+            return url;
+        }
+    }
+
+    return false;
+}
+
 function init() {
     // Disable sites to begin with
-    const blockLists = blockedListFull.concat(blockedListDomains);
+    const blockLists = blockedStartsWithUrl.concat(blockedDomains)
 
     for(i = 0; i < blockLists.length; i++) {
         let url = blockLists[i]
@@ -103,18 +103,32 @@ function init() {
      }
 }
 
-function block(match, tabId) {
+function blockTime(match, tab) {
     // Make sure its true in local storage
     const urlValue = localStorage.getItem(match)
 
     if (isAboveThreshold(urlValue)) {
-        const redirect = chrome.extension.getURL('blocked.html') + '?url=' + encodeURIComponent(match);
-
-        chrome.tabs.update(tabId, { url: redirect });
-
-        return;
+        return block(tab)
     }
 }
+
+function block(tab) {
+    const redirect = chrome.extension.getURL('blocked.html') + '?url=' + encodeURIComponent(tab.url);
+    
+    chrome.tabs.update(tab.id, { url: redirect });
+
+    return;
+}
+
+function blockAllTabs(tabs, tabIdNotTBlock) {
+    tabs.forEach((tab) => {
+        // Do not block urls with chrome in title
+        if (tab.id !== tabIdNotTBlock && !tab.url.startsWith("chrome")) {
+            block(tab)
+        }
+    })
+}
+
 function generateHtml(tab) {
     // Generate html, but hide website names so you dont get influenced to click a different site
     const div = document.getElementById('sites');
@@ -154,43 +168,53 @@ function generateHtml(tab) {
 }
 
 function run(tabs) {
-    
-    const tabUrls = tabs.map((tab) => {
-        return tab.url
+    // Always remove any tabs that start with the chrome extensions so we dont end up in a weird spot
+    let tabCount = tabs.length
+    let tabIdx = 0
+
+    while (tabIdx < tabCount -1) {
+        let tab = tabs.pop()
+        if (!tab.url.startsWith("chrome")) {
+            tabs.push(tab)
+        }
+        tabIdx += 1
+    }
+
+    // Highest priority, greedy
+    for (i = 0; i < blockAllTabsIfUrlOpen.length; i++) {
+        let url = blockAllTabsIfUrlOpen[i]
+        for (x = 0; x < tabs.length; x++) {
+            let tab = tabs[x]
+            if (tab.url.startsWith(url)) {
+                return blockAllTabs(tabs, tab.id)
+            }
+        }
+    }
+
+    // Remove any tabs from being blocked if they are always allowed
+    alwaysAllowStartsWithUrl.forEach((allow) => {
+        let tabCount = tabs.length
+        let tabIdx = 0
+
+        while (tabIdx < tabCount -1) {
+            let tab = tabs.pop()
+            if (!tab.url.startsWith(allow)) {
+                tabs.push(tab)
+            }
+            tabIdx += 1
+        }
     })
 
     tabs.forEach((tab) => {
-        // Skip any tab that is not on a url
-        if (tab.url.search(/https?:/) !== 0) {
-            return;
-        };
+        const tabDomain = extractDomain(tab.url)
 
-        // Get the current domain of the tab
-        const currentDomain = extractDomain(tab.url)
-
-        if (blockedSet.has(currentDomain)) {
-            // Skip blocking if the url is in the allowedList
-            for (i = 0; i < allowedList.length; i++) {
-                if (tab.url.startsWith(allowedList[i])) {
-                    return;
-                }
-            }
-
-            // Skip blocking if any tab is open that allows this url
-            if (tab.url in allowedIfAlsoHaveAnotherTabOpen) {
-                const tabUrlThatMustAlsoBeOpen = allowedIfAlsoHaveAnotherTabOpen[tab.url]
-                for (i = 0; i < tabUrls.length; i++) {
-                    if (tabUrls[i].startsWith(tabUrlThatMustAlsoBeOpen)) {
-                        return;
-                    }
-                }
-            }
-            block(currentDomain, tab.id)
+        if (blockedDomains.includes(tabDomain)) {
+            blockTime(tabDomain, tab)
         }
 
         let urlMatch = urlStartsWith(tab.url)
         if (urlMatch != false) {
-            block(urlMatch, tab.id)
+            blockTime(urlMatch, tab)
         }
     })
 
