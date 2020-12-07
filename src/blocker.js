@@ -92,7 +92,7 @@ function blockTime(match, tab) {
     // Make sure its true in local storage
     const urlValue = localStorage.getItem(match)
 
-    if (isAboveThreshold(urlValue)) {
+    if (isAboveThreshold(urlValue) || urlValue === null) {
         return block(tab)
     }
 }
