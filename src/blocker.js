@@ -2,38 +2,10 @@ function extractDomain(url) {
     return url.replace(/^(?:https?:\/\/)?(?:[^\/]+\.)?([^.\/]+\.[^.\/]+).*$/, "$1");
 }
 
-// Urls to never block even tho the domain itself might be blocked
-// Can be a full url like https://an.example.com
-const alwaysAllowStartsWithUrl = []
-
-// List of domains to block
-// Must be just the domain (example.com not an.example.com)
-// You will need to allow specific subdomains or queries within a blocked domain
-const blockedDomains = [
-    "example.com",
-]
-
-// Urls that are allowed as long as you have another tab open with a specific url.
-// Usecase is lets say you only want to allow music sites if you are also on github
-// Value is used with startsWith() so can be a full url like https://an.example.com
-// Key is an exact match
-// const allowedIfAlsoHaveAnotherTabOpen = {
-//     "http://www.example.com/": "https://github.com/"
-// }
-
-const blockedStartsWithUrl = [
-
-]
-
-const blockAllTabsIfUrlOpen = [
-
-]
-
 const today = new Date();
 const dd = String(today.getDate()).padStart(2, '0');
 const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
 const yyyy = today.getFullYear();
-
 
 const unlockCounterVar = `chromium-website-blocker-counter-${mm}-${dd}-${yyyy}`
 
@@ -80,6 +52,19 @@ function urlStartsWith(tabUrl) {
         let url = blockedStartsWithUrl[blockIdx];
 
         if (tabUrl.startsWith(url)) {
+            return url;
+        }
+    }
+
+    return false;
+}
+
+function regexMatch(tabUrl) {
+    for (let blockIdx = 0; blockIdx < regexBlock.length; blockIdx++) {
+        let url = regexBlock[blockIdx];
+
+        // Regex match
+        if (tabUrl.match(url) !== null) {
             return url;
         }
     }
@@ -215,6 +200,11 @@ function run(tabs) {
         let urlMatch = urlStartsWith(tab.url)
         if (urlMatch != false) {
             blockTime(urlMatch, tab)
+        }
+
+        let urlRegexMatch = regexMatch(tab.url)
+        if (urlRegexMatch != false) {
+            blockTime(urlRegexMatch, tab)
         }
     })
 
