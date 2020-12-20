@@ -1,5 +1,4 @@
 .DS_Store
-*-*-clone
 blockLists/*
 !blockLists/README.md
-
+dist/*-*-clone

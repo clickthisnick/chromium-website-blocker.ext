@@ -2,7 +2,6 @@
 
 ## Init
 
-
 ### To create block files (They are .gitignored)
 
 bash init.sh
