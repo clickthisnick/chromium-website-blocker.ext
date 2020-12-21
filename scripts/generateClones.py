@@ -28,12 +28,6 @@ extensionName = scriptPath.split('/')[-2]
 
 # Src Path
 srcPath = os.path.join(scriptPath, '../src')
-allDirectories = os.listdir(scriptPath)
-
-# Remove old clone extensions
-for x in allDirectories:
-    if x.endswith('clone'):
-        shutil.rmtree(x)
 
 # Read lists
 files = [
@@ -98,7 +92,12 @@ const regexBlock = {}
 
 # remove the existing dict folder
 distPath = clonePath = os.path.join(scriptPath, "../", "dist")
-shutil.rmtree(distPath)
+try:
+    shutil.rmtree(distPath)
+except:
+    pass
+
+os.mkdir(distPath)
 
 for i in range(0, cloneCount):
     clonePath = os.path.join(distPath, "{}-{}-clone".format(extensionName, i))
