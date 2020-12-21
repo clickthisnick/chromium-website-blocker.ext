@@ -48,27 +48,27 @@ for file in files:
     with open(file, 'r') as fr:
         fileContent = fr.readlines()
 
-        for i, f in enumerate(fileContent):
-            if f.endswith('\n'):
-                value = f[:-1]
-            else:
-                value = f
+    for i, f in enumerate(fileContent):
+        if f.endswith('\n'):
+            value = f[:-1]
+        else:
+            value = f
 
-            # "encrypted"
-            if value.endswith(encryptedEndsWith):
-                # Remove the encrypted indicator
-                value = value[:-len(encryptedEndsWith)]
-                value = decode(value)
+        # "encrypted"
+        if value.endswith(encryptedEndsWith):
+            # Remove the encrypted indicator
+            value = value[:-len(encryptedEndsWith)]
+            value = decode(value)
 
-            # not "encrypted"
-            else:
-                foundUnencrpytedValue = True
-                fileContent[i] = encode(f) + encryptedEndsWith + '\n'
-            
-            if value.endswith('\n'):
-                value = value[:-1]
+        # not "encrypted"
+        else:
+            foundUnencrpytedValue = True
+            fileContent[i] = encode(f) + encryptedEndsWith + '\n'
 
-            contents[file].append(value)
+        if value.endswith('\n'):
+            value = value[:-1]
+
+        contents[file].append(value)
 
     # write back the values but "encrypted" to the file
     if foundUnencrpytedValue:
@@ -77,17 +77,17 @@ for file in files:
                 fr.write(x)
 
 # Create clones, so we can't just disable the single extension
-writeUrlContent = """const alwaysAllowStartsWithUrl = {}
-const blockAllTabsIfUrlOpen = {}
-const blockedDomains = {}
-const blockedStartsWithUrl = {}
-const regexBlock = {}
+writeUrlContent = """const alwaysAllowStartsWithUrl = ['{}']
+const blockAllTabsIfUrlOpen = ['{}']
+const blockedDomains = ['{}']
+const blockedStartsWithUrl = ['{}']
+const regexBlock = ['{}']
 """.format(
-    contents[files[0]],
-    contents[files[1]],
-    contents[files[2]],
-    contents[files[3]],
-    contents[files[4]],
+    "','".join(contents[files[0]]),
+    "','".join(contents[files[1]]),
+    "','".join(contents[files[2]]),
+    "','".join(contents[files[3]]),
+    "','".join(contents[files[4]]),
 )
 
 # remove the existing dict folder
