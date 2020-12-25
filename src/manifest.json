@@ -6,7 +6,10 @@
   },
   "permissions": [
     "tabs",
-    "*://*/*"
+    "*://*/*",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
   ],
   "version": "0.0.1",
   "manifest_version": 2,

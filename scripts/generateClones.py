@@ -35,7 +35,8 @@ files = [
     'blockLists/blockAllTabsIfUrlOpen.txt',
     'blockLists/blockedDomains.txt',
     'blockLists/blockedStartsWithUrl.txt',
-    'blockLists/regexBlock.txt'
+    'blockLists/regexBlock.txt',
+    'blockLists/blockedRequestInitiator.txt',
 ]
 
 # dict of file contents unencrypted
@@ -108,6 +109,12 @@ writeUrlContent += "const regexBlock = ["
 if text:
     writeUrlContent += "'{}'".format(text)
 writeUrlContent += "]\n"
+
+text = '{}'.format('","'.join(contents[files[5]]))
+writeUrlContent += "const blockedRequestInitiator = {"
+if text:
+    writeUrlContent += '"{}"'.format(text)
+writeUrlContent += "}\n"
 
 # remove the existing dict folder
 distPath = clonePath = os.path.join(scriptPath, "../", "dist")

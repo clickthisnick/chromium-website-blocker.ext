@@ -13,3 +13,9 @@ Chrome -> More Tools -> Extensions -> Load Unpacked -> Load the `src` directory 
 ## Make better
 
 You can hide extensions in Chrome
+
+## Examples
+
+### blockedRequestInitiator.txt
+
+https://www.example.com": "true
