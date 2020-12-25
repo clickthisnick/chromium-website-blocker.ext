@@ -77,18 +77,37 @@ for file in files:
                 fr.write(x)
 
 # Create clones, so we can't just disable the single extension
-writeUrlContent = """const alwaysAllowStartsWithUrl = ['{}']
-const blockAllTabsIfUrlOpen = ['{}']
-const blockedDomains = ['{}']
-const blockedStartsWithUrl = ['{}']
-const regexBlock = ['{}']
-""".format(
-    "','".join(contents[files[0]]),
-    "','".join(contents[files[1]]),
-    "','".join(contents[files[2]]),
-    "','".join(contents[files[3]]),
-    "','".join(contents[files[4]]),
-)
+writeUrlContent = ""
+
+text = '{}'.format("','".join(contents[files[0]]))
+writeUrlContent += "const alwaysAllowStartsWithUrl = ["
+if text:
+    writeUrlContent += "'{}'".format(text)
+writeUrlContent += "]\n"
+
+text = '{}'.format("','".join(contents[files[1]]))
+writeUrlContent += "const blockAllTabsIfUrlOpen = ["
+if text:
+    writeUrlContent += "'{}'".format(text)
+writeUrlContent += "]\n"
+
+text = '{}'.format("','".join(contents[files[2]]))
+writeUrlContent += "const blockedDomains = ["
+if text:
+    writeUrlContent += "'{}'".format(text)
+writeUrlContent += "]\n"
+
+text = '{}'.format("','".join(contents[files[3]]))
+writeUrlContent += "const blockedStartsWithUrl = ["
+if text:
+    writeUrlContent += "'{}'".format(text)
+writeUrlContent += "]\n"
+
+text = '{}'.format("','".join(contents[files[4]]))
+writeUrlContent += "const regexBlock = ["
+if text:
+    writeUrlContent += "'{}'".format(text)
+writeUrlContent += "]\n"
 
 # remove the existing dict folder
 distPath = clonePath = os.path.join(scriptPath, "../", "dist")
