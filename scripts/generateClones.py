@@ -3,6 +3,9 @@
 import os
 import shutil
 import base64
+import os.path
+from os import path
+from subprocess import call
 
 encryptedEndsWith = 'SCRIPT-ENCODED'
 
@@ -31,12 +34,12 @@ srcPath = os.path.join(scriptPath, '../src')
 
 # Read lists
 files = [
-    'blockLists/alwaysAllowStartsWithUrl.txt',
-    'blockLists/blockAllTabsIfUrlOpen.txt',
-    'blockLists/blockedDomains.txt',
-    'blockLists/blockedStartsWithUrl.txt',
-    'blockLists/regexBlock.txt',
-    'blockLists/blockedRequestInitiator.txt',
+    f"{scriptPath}/../blockLists/alwaysAllowStartsWithUrl.txt",
+    f"{scriptPath}/../blockLists/blockAllTabsIfUrlOpen.txt",
+    f"{scriptPath}/../blockLists/blockedDomains.txt",
+    f"{scriptPath}/../blockLists/blockedStartsWithUrl.txt",
+    f"{scriptPath}/../blockLists/regexBlock.txt",
+    f"{scriptPath}/../blockLists/blockedRequestInitiator.txt",
 ]
 
 # dict of file contents unencrypted
@@ -125,10 +128,56 @@ except:
 
 os.mkdir(distPath)
 
+extensionLoadingString = "--load-extension="
+
 for i in range(0, cloneCount):
     clonePath = os.path.join(distPath, "{}-{}-clone".format(extensionName, i))
     shutil.copytree(srcPath, clonePath)
 
-    blockerJsPath = clonePath + '/blocker.js'
+    blockerJsPath = os.path.join(clonePath, 'blocker.js')
+
     with open(blockerJsPath, 'r') as original: data = original.read()
     with open(blockerJsPath, 'w') as modified: modified.write(writeUrlContent + data)
+    extensionLoadingString += f"{clonePath},"
+
+# Remove the final comma
+extensionLoadingString = extensionLoadingString[:-1]
+
+# Move the real google chrome to browser
+if not path.exists("/Applications/Browser.app"):
+    shutil.copyfile('/Applications/Google\ Chrome.app', '/Applications/Browser.app')
+
+bashScript = f"""#!/bin/bash
+
+# Prompt the user to type in something before opening chrome
+a=$(osascript -e 'try
+tell app "SystemUIServer"
+set answer to text returned of (display dialog "What are you going to do?" default answer "")
+end
+end
+activate app (path to frontmost application as text)
+answer' | tr '\r' ' ')
+
+# If the dialog box is empty or if you hit cancel then exit
+
+if [[ -z "$a" ]]; then
+   exit
+elif [[ $a == https://* ]]; then
+   homepage=$a
+else
+   homepage="http://duckduckgo.com/?q=$a"
+fi
+
+# Kill any chrome processes
+pkill Chrome
+pgrep -f mac_popup | xargs kill
+
+/Applications/Browser.app/Contents/MacOS/Google\ Chrome {extensionLoadingString} --dns-prefetch-disable --homepage \"$homepage\" & nohup sh {scriptPath}/mac_popup.sh \"Chrome Goal: $a\" 5 60 &>/dev/null &
+"""
+
+chromeInitScript = f"{scriptPath}/../dist/GoogleChrome.sh"
+
+with open(chromeInitScript, 'w') as fr:
+    fr.write(bashScript)
+
+rc = call(f"{scriptPath}/appify.sh {chromeInitScript}", shell=True)

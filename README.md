@@ -16,6 +16,10 @@ You can hide extensions in Chrome
 
 ## Examples
 
+### regexBlock.txt
+
+https://www.example.com/foo\\?.*&bar=baz&.*
+
 ### blockedRequestInitiator.txt
 
 https://www.example.com": "true

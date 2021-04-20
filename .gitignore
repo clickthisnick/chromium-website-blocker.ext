@@ -1,4 +1,5 @@
 .DS_Store
 blockLists/*
 !blockLists/README.md
-dist/*-*-clone
+dist
+scripts/chrome.icns
