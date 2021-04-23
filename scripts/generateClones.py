@@ -145,9 +145,19 @@ extensionLoadingString = extensionLoadingString[:-1]
 
 # Move the real google chrome to browser
 if not path.exists("/Applications/Browser.app"):
-    shutil.copyfile('/Applications/Google\ Chrome.app', '/Applications/Browser.app')
+    shutil.copytree('/Applications/Google Chrome.app', '/Applications/Browser.app')
 
 bashScript = f"""#!/bin/bash
+
+# Disable incognito mode which extensions have to be explicitly installed and allowed
+# ie. Enabling extensions via cli won't work in incognito mode
+defaults write com.google.chrome IncognitoModeAvailability -integer 1
+
+# Disable guest mode which wouldn't have extensions installed
+defaults write com.google.Chrome BrowserGuestModeEnabled -bool false
+
+# Don't allow anyone to add guests which then wouldn't have the extensions installed
+defaults write com.google.Chrome BrowserAddPersonEnabled -bool false
 
 # Prompt the user to type in something before opening chrome
 a=$(osascript -e 'try
