@@ -6,6 +6,8 @@ import base64
 import os.path
 from os import path
 from subprocess import call
+import string
+import random
 
 encryptedEndsWith = 'SCRIPT-ENCODED'
 
@@ -144,8 +146,16 @@ for i in range(0, cloneCount):
 extensionLoadingString = extensionLoadingString[:-1]
 
 # Move the real google chrome to browser
-if not path.exists("/Applications/Browser.app"):
+if path.exists('/Applications/Google Chrome.app'):
     shutil.copytree('/Applications/Google Chrome.app', '/Applications/Browser.app')
+
+# Move the real google chrome to a randomly named app
+if path.exists("/Applications/Browser.app"):
+    letters = string.ascii_letters
+    random_str = ''.join(random.choice(letters) for i in range(10))
+    letters = string.digits
+    random_str += ''.join(random.choice(letters) for i in range(10))
+    shutil.copytree('/Applications/Browser.app', f"/Applications/{random_str}.app")
 
 bashScript = f"""#!/bin/bash
 
@@ -160,29 +170,40 @@ defaults write com.google.Chrome BrowserGuestModeEnabled -bool false
 defaults write com.google.Chrome BrowserAddPersonEnabled -bool false
 
 # Prompt the user to type in something before opening chrome
-a=$(osascript -e 'try
-tell app "SystemUIServer"
-set answer to text returned of (display dialog "What are you going to do?" default answer "")
-end
-end
-activate app (path to frontmost application as text)
-answer' | tr '\r' ' ')
+#a=$(osascript -e 'try
+#tell app "SystemUIServer"
+#set answer to text returned of (display dialog "What are you going to do?" default answer "")
+#end
+#end
+#activate app (path to frontmost application as text)
+#answer' | tr '
+#' ' ')
 
 # If the dialog box is empty or if you hit cancel then exit
 
-if [[ -z "$a" ]]; then
-   exit
-elif [[ $a == https://* ]]; then
-   homepage=$a
-else
-   homepage="http://duckduckgo.com/?q=$a"
-fi
+homepage="http://duckduckgo.com"
 
 # Kill any chrome processes
 pkill Chrome
 pgrep -f mac_popup | xargs kill
 
-/Applications/Browser.app/Contents/MacOS/Google\ Chrome {extensionLoadingString} --dns-prefetch-disable --homepage \"$homepage\" & nohup sh {scriptPath}/mac_popup.sh \"Chrome Goal: $a\" 5 60 &>/dev/null &
+randomFile=$(ls /Applications/*.app/Contents/MacOS/Google\ Chrome*)
+myarray=$(echo $randomFile | tr '/' ' ')
+IFS=' '
+stringarray=($myarray)
+randomNameWithApp=${{stringarray[1]}}
+
+chars=abcdefghijklmnopqrstuvwxyz
+for i in {{1..8}} ; do
+    echo -n "${{chars:newRandomName%${{#chars}}:1}}"
+done
+
+mv /Applications/${{randomNameWithApp}} /Applications/${{newRandomName}}.app
+
+/Applications/${{newRandomName}}.app/Contents/MacOS/Google\ Chrome {extensionLoadingString} --dns-prefetch-disable --homepage \"$homepage\" 
+
+# You can tack this on the the chrome opening, but sometimes it will crash websites
+# & nohup sh /Users/mycomputer/dev/chromium-website-blocker.ext/scripts/mac_popup.sh "Chrome Goal: $a" 5 60 &>/dev/null &
 """
 
 chromeInitScript = f"{scriptPath}/../dist/GoogleChrome.sh"
