@@ -200,7 +200,7 @@ done
 
 mv /Applications/${{randomNameWithApp}} /Applications/${{newRandomName}}.app
 
-/Applications/${{newRandomName}}.app/Contents/MacOS/Google\ Chrome {extensionLoadingString} --dns-prefetch-disable --homepage \"$homepage\" 
+/Applications/${{newRandomName}}.app/Contents/MacOS/Google\ Chrome {extensionLoadingString} --no-default-browser-check --dns-prefetch-disable --homepage \"$homepage\" 
 
 # You can tack this on the the chrome opening, but sometimes it will crash websites
 # & nohup sh /Users/mycomputer/dev/chromium-website-blocker.ext/scripts/mac_popup.sh "Chrome Goal: $a" 5 60 &>/dev/null &
