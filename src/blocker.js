@@ -97,6 +97,18 @@ function blockTime(match, tab) {
     }
 }
 
+function blockIncognito(tab) {
+    if (tab.url.startsWith('chrome')) {
+        return
+    }
+
+    const redirect = chrome.extension.getURL('blockedIncognito.html')
+
+    chrome.tabs.update(tab.id, { url: redirect });
+
+    return;
+}
+
 function block(tab) {
     const redirect = chrome.extension.getURL('blocked.html') + '?url=' + encodeURIComponent(tab.url);
     
@@ -159,6 +171,14 @@ function run(tabs) {
 
     while (tabIdx < tabCount -1) {
         let tab = tabs.pop()
+
+        // Remove any incognito tabs
+        // This is a way to circumvent the system
+        if (tab.incognito) {
+            blockIncognito(tab)
+            continue
+        }
+
         if (!tab.url.startsWith("chrome")) {
             tabs.push(tab)
         }

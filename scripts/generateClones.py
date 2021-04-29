@@ -131,9 +131,10 @@ except:
 os.mkdir(distPath)
 
 extensionLoadingString = "--load-extension="
+letters = string.ascii_letters
 
 for i in range(0, cloneCount):
-    clonePath = os.path.join(distPath, "{}-{}-clone".format(extensionName, i))
+    clonePath = os.path.join(distPath, "{}-{}-clone".format(extensionName + ''.join(random.choice(letters) for i in range(21)), i))
     shutil.copytree(srcPath, clonePath)
 
     blockerJsPath = os.path.join(clonePath, 'blocker.js')
@@ -161,6 +162,7 @@ bashScript = f"""#!/bin/bash
 
 # Disable incognito mode which extensions have to be explicitly installed and allowed
 # ie. Enabling extensions via cli won't work in incognito mode
+# 1 disables
 defaults write com.google.chrome IncognitoModeAvailability -integer 1
 
 # Disable guest mode which wouldn't have extensions installed
@@ -206,9 +208,18 @@ mv /Applications/${{randomNameWithApp}} /Applications/${{newRandomName}}.app
 # & nohup sh /Users/mycomputer/dev/chromium-website-blocker.ext/scripts/mac_popup.sh "Chrome Goal: $a" 5 60 &>/dev/null &
 """
 
+# Remove GoogleChrome in this dir
+custom_chrome_dist_path = f"{scriptPath}/../GoogleChrome.app"
+os.system(f"rm -rf {custom_chrome_dist_path}")
+
 chromeInitScript = f"{scriptPath}/../dist/GoogleChrome.sh"
 
 with open(chromeInitScript, 'w') as fr:
     fr.write(bashScript)
 
 rc = call(f"{scriptPath}/appify.sh {chromeInitScript}", shell=True)
+
+# Remove any existing GoogleChrome custom app and move our newly generated one to that path
+application_chrome_path = "/Applications/GoogleChrome.app"
+os.system(f"rm -rf {application_chrome_path}")
+os.system(f"mv {custom_chrome_dist_path} {application_chrome_path}")
