@@ -130,11 +130,11 @@ except:
 
 os.mkdir(distPath)
 
-extensionLoadingString = "--load-extension="
+extensionLoadingString = ""
 letters = string.ascii_letters
 
 for i in range(0, cloneCount):
-    clonePath = os.path.join(distPath, "{}-{}-clone".format(extensionName + ''.join(random.choice(letters) for i in range(21)), i))
+    clonePath = os.path.join(distPath, "extensions", "{}-{}-clone".format(extensionName + ''.join(random.choice(letters) for i in range(21)), i))
     shutil.copytree(srcPath, clonePath)
 
     blockerJsPath = os.path.join(clonePath, 'blocker.js')
@@ -148,7 +148,7 @@ extensionLoadingString = extensionLoadingString[:-1]
 
 # Move the real google chrome to browser
 if path.exists('/Applications/Google Chrome.app'):
-    shutil.copytree('/Applications/Google Chrome.app', '/Applications/Browser.app')
+    shutil.move('/Applications/Google Chrome.app', '/Applications/Browser.app')
 
 # Move the real google chrome to a randomly named app
 if path.exists("/Applications/Browser.app"):
@@ -156,7 +156,7 @@ if path.exists("/Applications/Browser.app"):
     random_str = ''.join(random.choice(letters) for i in range(10))
     letters = string.digits
     random_str += ''.join(random.choice(letters) for i in range(10))
-    shutil.copytree('/Applications/Browser.app', f"/Applications/{random_str}.app")
+    shutil.move('/Applications/Browser.app', f"/Applications/{random_str}.app")
 
 bashScript = f"""#!/bin/bash
 
@@ -190,19 +190,25 @@ pkill Chrome
 pgrep -f mac_popup | xargs kill
 
 randomFile=$(ls /Applications/*.app/Contents/MacOS/Google\ Chrome*)
-myarray=$(echo $randomFile | tr '/' ' ')
-IFS=' '
-stringarray=($myarray)
-randomNameWithApp=${{stringarray[1]}}
+#myarray=$(echo $randomFile | tr '/' ' ')
+#IFS=' '
+#stringarray=($myarray)
+#randomNameWithApp=${{stringarray[1]}}
 
-chars=abcdefghijklmnopqrstuvwxyz
-for i in {{1..8}} ; do
-    echo -n "${{chars:newRandomName%${{#chars}}:1}}"
-done
+#chars=abcdefghijklmnopqrstuvwxyz
+#for i in {{1..8}} ; do
+#    echo -n "${{chars:newRandomName%${{#chars}}:1}}"
+#done
 
-mv /Applications/${{randomNameWithApp}} /Applications/${{newRandomName}}.app
+# Rename all folders with a prefix
+find {distPath}/extensions -maxdepth 1 -mindepth 1 -type d -execdir bash -c 'mv "$1" "./a_${{1#./}}"' mover {{}} \;
 
-/Applications/${{newRandomName}}.app/Contents/MacOS/Google\ Chrome {extensionLoadingString} --no-default-browser-check --dns-prefetch-disable --homepage \"$homepage\" 
+extensionsCommaDelimited=$(ls -d {distPath}/extensions/* | grep clone | tr '\n' ',')
+echo $extensionsCommaDelimited
+
+# mv "/Applications/${{randomNameWithApp}}" "/Applications/${{newRandomName}}.app"
+
+"${{randomFile}}" --load-extension=${{extensionsCommaDelimited}} --no-default-browser-check --dns-prefetch-disable --homepage "$homepage" 
 
 # You can tack this on the the chrome opening, but sometimes it will crash websites
 # & nohup sh /Users/mycomputer/dev/chromium-website-blocker.ext/scripts/mac_popup.sh "Chrome Goal: $a" 5 60 &>/dev/null &
