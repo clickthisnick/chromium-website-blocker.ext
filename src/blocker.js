@@ -42,7 +42,7 @@ function toggleUrl(url, inputText) {
             document.getElementById(url).value = "Enable"
         } else {
             localStorage.setItem(url, getMillisecondTime(millisecondsLimit))
-            document.getElementById(url).value = "Disable" 
+            document.getElementById(url).value = "Disable"
         }
     }
 }
@@ -111,7 +111,7 @@ function blockIncognito(tab) {
 
 function block(tab) {
     const redirect = chrome.extension.getURL('blocked.html') + '?url=' + encodeURIComponent(tab.url);
-    
+
     chrome.tabs.update(tab.id, { url: redirect });
 
     return;
@@ -131,7 +131,7 @@ function generateHtml(tab) {
     const div = document.getElementById('sites');
 
     let url = tab.url.split('blocked.html?url=')
-    if (url.length === 1){ 
+    if (url.length === 1){
         url = url[0]
     } else {
         url = url[1]
@@ -233,14 +233,14 @@ function run(tabs) {
 
 chrome.tabs.onCreated.addListener(function(tab) {
     chrome.tabs.getAllInWindow(tab.windowId, function(tabs) {
-        run(tabs)    
+        run(tabs)
     })
 });
 
 chrome.tabs.onActivated.addListener(function(info) {
     chrome.tabs.get(info.tabId, function(tab) {
         chrome.tabs.getAllInWindow(tab.windowId, function(tabs) {
-            run(tabs)    
+            run(tabs)
         })
     });
 });
@@ -248,7 +248,7 @@ chrome.tabs.onActivated.addListener(function(info) {
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status === 'loading') {
         chrome.tabs.getAllInWindow(tab.windowId, function(tabs) {
-            run(tabs)    
+            run(tabs)
             return
         })
     }
