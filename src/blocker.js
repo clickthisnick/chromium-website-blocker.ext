@@ -260,7 +260,6 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
     if (details.initiator in blockedRequestInitiator) {
         return {'cancel': true}
     }
-    console.log('details', details)
     return
 }, {urls: ["<all_urls>"]}, ['blocking', 'requestHeaders'])
 

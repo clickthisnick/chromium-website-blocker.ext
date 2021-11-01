@@ -3,3 +3,4 @@ blockLists/*
 !blockLists/README.md
 dist
 scripts/chrome.icns
+__pycache__
