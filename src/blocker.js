@@ -92,7 +92,10 @@ function blockTime(match, tab) {
     // Make sure its true in local storage
     const urlValue = localStorage.getItem(match)
 
+    console.log(`blockTime - ${urlValue}`)
+
     if (isAboveThreshold(urlValue) || urlValue === null) {
+        console.log(`should be blocking - ${urlValue}`)
         return block(tab)
     }
 }
@@ -165,6 +168,8 @@ function generateHtml(tab) {
 }
 
 function run(tabs) {
+    console.log('running tabs workflow')
+
     // Always remove any tabs that start with the chrome extensions so we dont end up in a weird spot
     let tabCount = tabs.length
     let tabIdx = 0
@@ -212,12 +217,15 @@ function run(tabs) {
 
     tabs.forEach((tab) => {
         const tabDomain = extractDomain(tab.url)
+        console.log(`Found tab domain: ${tabDomain}`)
 
         if (blockedDomains.includes(tabDomain)) {
             blockTime(tabDomain, tab)
         }
 
         let urlMatch = urlStartsWith(tab.url)
+        console.log(`urlMatch: ${tabDomain} - ${urlMatch}`)
+
         if (urlMatch != false) {
             blockTime(urlMatch, tab)
         }
@@ -232,12 +240,14 @@ function run(tabs) {
 }
 
 chrome.tabs.onCreated.addListener(function(tab) {
+    console.log('tabs add listener')
     chrome.tabs.getAllInWindow(tab.windowId, function(tabs) {
         run(tabs)
     })
 });
 
 chrome.tabs.onActivated.addListener(function(info) {
+    console.log('tabs get all windows')
     chrome.tabs.get(info.tabId, function(tab) {
         chrome.tabs.getAllInWindow(tab.windowId, function(tabs) {
             run(tabs)
@@ -246,6 +256,7 @@ chrome.tabs.onActivated.addListener(function(info) {
 });
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+    console.log('tabs loading')
     if (changeInfo.status === 'loading') {
         chrome.tabs.getAllInWindow(tab.windowId, function(tabs) {
             run(tabs)
@@ -257,6 +268,9 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 // Block web requests
 var opt_extraInfoSpec = ["blocking", "requestHeaders"];
 chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
+    console.log('details')
+
+    console.log(`initiator ${details.initiator} - ${details.initiator in blockedRequestInitiator}`);
     if (details.initiator in blockedRequestInitiator) {
         return {'cancel': true}
     }
@@ -266,6 +280,8 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
 init()
 
 chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+    console.log('query')
+
     generateHtml(tabs[0]);
     // use `url` here inside the callback because it's asynchronous!
 });

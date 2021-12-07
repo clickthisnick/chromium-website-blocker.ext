@@ -45,10 +45,8 @@ def decodeAll():
             fileContent = fr.readlines()
 
         for i, f in enumerate(fileContent):
-            if f.endswith("\n"):
-                value = f[:-1]
-            else:
-                value = f
+            # remove all whitespace
+            value = f.strip()
 
             # "encrypted"
             if value.endswith(ENCRYPTED_ENDS_WITH):
@@ -57,8 +55,8 @@ def decodeAll():
                 value = value[: -len(ENCRYPTED_ENDS_WITH)]
                 value = decode(value)
 
-            if value.endswith("\n"):
-                value = value[:-1]
+            # remove all whitespace
+            value = value.strip()
 
             contents[file].append(value)
 
@@ -80,6 +78,18 @@ def decodeAll():
                     f"https://duckduckgo.com/?q={domain_block.split('.')[0]}&"
                 )
 
+        # blockedRequestInitiator add all domains to list
+        if file.endswith("blockedRequestInitiator.txt"):
+            domain_block_list = get_domain_block_list()
+
+            for domain_block in domain_block_list:
+                if domain_block.endswith("\n"):
+                    domain_block = domain_block[:-1]
+                contents[file].append(f'https://www.{domain_block}": "true')
+                contents[file].append(f'https://m.{domain_block}": "true')
+                contents[file].append(f'https://{domain_block}": "true')
+                contents[file].append(f'https://mobile.{domain_block}": "true')
+
         # write back the values but "encrypted" to the file
         contents_to_write = sorted(set(contents[file]))
         with open(file, "w") as fr:
@@ -100,10 +110,8 @@ def encodeAll():
             fileContent = fr.readlines()
 
         for i, f in enumerate(fileContent):
-            if f.endswith("\n"):
-                value = f[:-1]
-            else:
-                value = f
+            # remove all whitespace
+            value = f.strip()
 
             # "encrypted"
             if value.endswith(ENCRYPTED_ENDS_WITH):
@@ -116,8 +124,8 @@ def encodeAll():
                 foundUnencrpytedValue = True
                 value = encode(f) + ENCRYPTED_ENDS_WITH + "\n"
 
-            if value.endswith("\n"):
-                value = value[:-1]
+            # remove all whitespace
+            value = value.strip()
 
             contents[file].append(value)
 

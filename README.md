@@ -13,13 +13,3 @@ Chrome -> More Tools -> Extensions -> Load Unpacked -> Load the `src` directory 
 ## Make better
 
 You can hide extensions in Chrome
-
-## Examples
-
-### regexBlock.txt
-
-https://www.example.com/foo\\?.*&bar=baz&.*
-
-### blockedRequestInitiator.txt
-
-https://www.example.com": "true

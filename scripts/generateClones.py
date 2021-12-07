@@ -113,13 +113,17 @@ def generateAllClones(distPath):
     letters = string.ascii_letters
 
     for i in range(0, cloneCount):
-        clonePath = os.path.join(
-            distPath,
-            "extensions",
-            "{}-{}-clone".format(
-                extensionName + "".join(random.choice(letters) for i in range(21)), i
-            ),
-        )
+        if i == 1:
+            clonePath = os.path.join(distPath, "extensions", "astatic")
+        else:
+            clonePath = os.path.join(
+                distPath,
+                "extensions",
+                "{}-{}-clone".format(
+                    extensionName + "".join(random.choice(letters) for i in range(21)),
+                    i,
+                ),
+            )
         shutil.copytree(srcPath, clonePath)
 
         blockerJsPath = os.path.join(clonePath, "blocker.js")
