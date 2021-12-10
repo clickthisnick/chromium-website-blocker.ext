@@ -2,18 +2,29 @@
   "name": "WebsiteBlocker",
   "description": "Developer Friendly Website Blocker",
   "background": {
-    "page": "popup.html"
+    "service_worker": "background.js"
+  },
+  "declarative_net_request" : {
+    "rule_resources" : [
+      {
+        "id": "rules_template",
+        "enabled": true,
+        "path": "rules_template.json"
+      },
+      {
+        "id": "rules_generated",
+        "enabled": true,
+        "path": "rules_generated.json"
+      }
+    ]
   },
   "permissions": [
     "tabs",
-    "*://*/*",
-    "webRequest",
-    "webRequestBlocking",
-    "<all_urls>"
+    "declarativeNetRequest"
   ],
   "version": "0.0.1",
-  "manifest_version": 2,
-  "browser_action": {
+  "manifest_version": 3,
+  "action": {
     "default_popup": "popup.html"
   }
 }

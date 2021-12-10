@@ -19,5 +19,5 @@ for line in lines:
 
 block_list_string = "\n".join(block_list)
 
-with open(write_path, "w") as f:
+with open(write_path, "w", encoding="utf-8") as f:
     f.write(block_list_string)

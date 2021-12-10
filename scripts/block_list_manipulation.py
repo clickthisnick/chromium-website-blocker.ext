@@ -41,7 +41,7 @@ def decodeAll():
     for file in BLOCKLISTS:
         contents[file] = []
 
-        with open(file, "r") as fr:
+        with open(file, "r", encoding="utf-8") as fr:
             fileContent = fr.readlines()
 
         for i, f in enumerate(fileContent):
@@ -92,10 +92,10 @@ def decodeAll():
 
         # write back the values but "encrypted" to the file
         contents_to_write = sorted(set(contents[file]))
-        with open(file, "w") as fr:
+        with open(file, "w", encoding="utf-8") as file_handle:
             for x in contents_to_write:
-                fr.write(x)
-                fr.write("\n")
+                file_handle.write(x)
+                file_handle.write("\n")
 
 
 def encodeAll():
@@ -104,9 +104,9 @@ def encodeAll():
 
     for file in BLOCKLISTS:
         contents[file] = []
-        foundUnencrpytedValue = False
+        found_unencrpyted_value = False
 
-        with open(file, "r") as fr:
+        with open(file, "r", encoding="utf-8") as fr:
             fileContent = fr.readlines()
 
         for i, f in enumerate(fileContent):
@@ -121,7 +121,7 @@ def encodeAll():
 
             # not "encrypted"
             else:
-                foundUnencrpytedValue = True
+                found_unencrpyted_value = True
                 value = encode(f) + ENCRYPTED_ENDS_WITH + "\n"
 
             # remove all whitespace
@@ -130,12 +130,12 @@ def encodeAll():
             contents[file].append(value)
 
         # write back the values but "encrypted" to the file
-        if foundUnencrpytedValue:
-            with open(file, "w") as fr:
+        if found_unencrpyted_value:
+            with open(file, "w", encoding="utf-8") as fr:
                 for x in contents[file]:
                     fr.write(x)
                     fr.write("\n")
 
 
 decodeAll()
-encodeAll()
+# encodeAll()
