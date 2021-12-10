@@ -5,3 +5,4 @@ dist
 src/rules_generated.json
 scripts/chrome.icns
 __pycache__
+venv

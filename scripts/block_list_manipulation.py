@@ -15,7 +15,8 @@ BLOCKLISTS = [
 
 def encode(message):
     """
-    This is just a small level of obfuscation so that we cannot look at our blocklists and see all the time consuming websites we are blocking
+    This is just a small level of obfuscation so that we cannot look at our blocklists
+        and see all the time consuming websites we are blocking
     """
     message_bytes = message.encode("ascii")
     base64_bytes = base64.b64encode(message_bytes)
@@ -27,13 +28,14 @@ def decode(message):
     return base64_bytes.decode("ascii")
 
 
-def decodeAll():
+def decode_all():
     def get_domain_block_list():
         for blocklist in BLOCKLISTS:
             if blocklist.endswith("blockedDomains.txt"):
                 with open(blocklist, "r", encoding="utf-8") as file_:
                     contents = file_.readlines()
                 return contents
+        return []
 
     # dict of file contents unencrypted
     contents = {}
@@ -41,12 +43,12 @@ def decodeAll():
     for file in BLOCKLISTS:
         contents[file] = []
 
-        with open(file, "r", encoding="utf-8") as fr:
-            fileContent = fr.readlines()
+        with open(file, "r", encoding="utf-8") as file_handle:
+            file_content = file_handle.readlines()
 
-        for i, f in enumerate(fileContent):
+        for line in file_content:
             # remove all whitespace
-            value = f.strip()
+            value = line.strip()
 
             # "encrypted"
             if value.endswith(ENCRYPTED_ENDS_WITH):
@@ -93,12 +95,12 @@ def decodeAll():
         # write back the values but "encrypted" to the file
         contents_to_write = sorted(set(contents[file]))
         with open(file, "w", encoding="utf-8") as file_handle:
-            for x in contents_to_write:
-                file_handle.write(x)
+            for line in contents_to_write:
+                file_handle.write(line)
                 file_handle.write("\n")
 
 
-def encodeAll():
+def encode_all():
     # dict of file contents unencrypted
     contents = {}
 
@@ -106,12 +108,12 @@ def encodeAll():
         contents[file] = []
         found_unencrpyted_value = False
 
-        with open(file, "r", encoding="utf-8") as fr:
-            fileContent = fr.readlines()
+        with open(file, "r", encoding="utf-8") as file_handle:
+            file_content = file_handle.readlines()
 
-        for i, f in enumerate(fileContent):
+        for line in file_content:
             # remove all whitespace
-            value = f.strip()
+            value = line.strip()
 
             # "encrypted"
             if value.endswith(ENCRYPTED_ENDS_WITH):
@@ -122,7 +124,7 @@ def encodeAll():
             # not "encrypted"
             else:
                 found_unencrpyted_value = True
-                value = encode(f) + ENCRYPTED_ENDS_WITH + "\n"
+                value = encode(line) + ENCRYPTED_ENDS_WITH + "\n"
 
             # remove all whitespace
             value = value.strip()
@@ -131,11 +133,11 @@ def encodeAll():
 
         # write back the values but "encrypted" to the file
         if found_unencrpyted_value:
-            with open(file, "w", encoding="utf-8") as fr:
-                for x in contents[file]:
-                    fr.write(x)
-                    fr.write("\n")
+            with open(file, "w", encoding="utf-8") as file_handle:
+                for line in contents[file]:
+                    file_handle.write(line)
+                    file_handle.write("\n")
 
 
-decodeAll()
-# encodeAll()
+decode_all()
+encode_all()
