@@ -100,7 +100,7 @@ def generate_all_clones(dist_path):
     # remove the existing dict folder
     try:
         shutil.rmtree(dist_path)
-    except Exception: # pylint:disable=broad-except
+    except Exception:  # pylint:disable=broad-except
         pass
 
     os.mkdir(dist_path)
