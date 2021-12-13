@@ -3,6 +3,7 @@
 import os
 import shutil
 import string
+import json
 import random
 from block_list_manipulation import (
     SCRIPTPATH,
@@ -10,6 +11,8 @@ from block_list_manipulation import (
     ENCRYPTED_ENDS_WITH,
     encode,
     decode,
+    decode_all,
+    encode_all,
 )
 
 
@@ -114,9 +117,32 @@ def generate_all_clones(dist_path, src_path, extension_name, write_url_content):
     extension_loading_string = extension_loading_string[:-1]
 
 
+def generate_request_rules():
+    read_path = os.path.join(SCRIPTPATH, "../blockLists/blockedDomains.txt")
+    rule_template_path = os.path.join(SCRIPTPATH, "../src/rules_template.json")
+    rule_path = os.path.join(SCRIPTPATH, "../src/rules_generated.json")
+
+    with open(read_path, encoding="utf-8") as file_handle:
+        lines = file_handle.readlines()
+
+    with open(rule_template_path, encoding="utf-8") as rules_template:
+        rules = json.load(rules_template)
+
+    for line in lines:
+        line = line.strip()
+        rules[0]["condition"]["domains"].append(line)
+
+    with open(rule_path, "w", encoding="utf-8") as file_handle:
+        json.dump(rules, file_handle, indent=2)
+
+
 def main():
     # Script Path
     dist_path = os.path.join(SCRIPTPATH, "../", "dist")
+
+    decode_all()
+    generate_request_rules()
+    encode_all()
 
     # Extension Name
     extension_name = SCRIPTPATH.split("/")[-2]
