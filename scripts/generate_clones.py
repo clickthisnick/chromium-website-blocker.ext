@@ -69,7 +69,10 @@ def generate_block_code():
         write_url_content += var
         if text:
             write_url_content += f"'{text}'"
-        write_url_content += "]\n"
+
+        ending = "}" if "blockedRequestInitiator" in var else "]"
+
+        write_url_content += f"{ending}\n"
 
     return write_url_content
 

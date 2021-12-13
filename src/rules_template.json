@@ -7,10 +7,20 @@
       "domains" : [
       ],
       "resourceTypes" : [
-          "script",
-          "sub_frame",
           "main_frame",
-          "media"
+          "sub_frame",
+          "stylesheet",
+          "script",
+          "image",
+          "font",
+          "object",
+          "xmlhttprequest",
+          "ping",
+          "csp_report",
+          "media",
+          "websocket",
+          "webtransport",
+          "other"
         ]
     }
   }
