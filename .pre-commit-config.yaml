@@ -1,12 +1,12 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v4.1.0
     hooks:
     -   id: check-yaml
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/psf/black
-    rev: 21.12b0
+    rev: 22.1.0
     hooks:
     -   id: black
 -   repo: https://github.com/codespell-project/codespell
@@ -18,6 +18,14 @@ repos:
     hooks:
     -   id: pylint
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.910-1
+    rev: v0.931
     hooks:
     -   id: mypy
+-   repo: https://github.com/pre-commit/mirrors-eslint
+    rev: 'v8.8.0'  # Use the sha / tag you want to point at
+    hooks:
+    -   id: eslint
+        args: ['--fix']
+        additional_dependencies:
+        -   eslint@8.8.0
+        -   eslint-config-google@0.14.0
