@@ -80,8 +80,11 @@ def generate_block_code():
     return write_url_content
 
 
-def generate_all_clones(dist_path: str, src_path: str, extension_name: str, write_url_content: str):
+def generate_all_clones(
+    dist_path: str, src_path: str, extension_name: str, write_url_content: str
+):
     clone_count = 30
+    ext_path = os.path.join(dist_path, "extensions")
 
     # remove the existing dict folder
     try:
@@ -93,17 +96,15 @@ def generate_all_clones(dist_path: str, src_path: str, extension_name: str, writ
 
     extension_loading_string = ""
     letters = string.ascii_letters
-    
 
     for i in range(0, clone_count):
         if i == 1:
             dir_name = "astatic"
-            clone_path = os.path.join(dist_path, "extensions", dir_name)
+            clone_path = os.path.join(ext_path, dir_name)
         else:
             dir_name = f'{extension_name + "".join(random.choice(letters) for i in range(21))}-{i}-clone'
             clone_path = os.path.join(
-                dist_path,
-                "extensions",
+                ext_path,
                 dir_name,
             )
         shutil.copytree(src_path, clone_path)
@@ -116,8 +117,8 @@ def generate_all_clones(dist_path: str, src_path: str, extension_name: str, writ
             modified.write(write_url_content + data)
         extension_loading_string += f"{clone_path},"
 
-        zip_path = os.path.join(clone_path, dir_name)
-        shutil.make_archive(zip_path, 'zip', clone_path)
+        zip_path = os.path.join(ext_path, "zips", dir_name)
+        shutil.make_archive(zip_path, "zip", clone_path)
 
     # Remove the final comma
     extension_loading_string = extension_loading_string[:-1]
