@@ -64,7 +64,6 @@ def generate_block_code():
         "const blockedDomains = [": contents[BLOCKLISTS[2]],
         "const blockedStartsWithUrl = [": contents[BLOCKLISTS[3]],
         "const regexBlock = [": contents[BLOCKLISTS[4]],
-        "const blockedRequestInitiator = {": contents[BLOCKLISTS[5]],
     }
 
     for var, content in var_to_contents.items():
@@ -73,14 +72,14 @@ def generate_block_code():
         if text:
             write_url_content += f"'{text}'"
 
-        ending = "}" if "blockedRequestInitiator" in var else "]"
+        ending = "]"
 
         write_url_content += f"{ending}\n"
 
     return write_url_content
 
 
-def generate_all_clones(
+def generate_all_clones(  # pylint:disable=too-many-locals
     dist_path: str, src_path: str, extension_name: str, write_url_content: str
 ):
     clone_count = 30
@@ -102,7 +101,7 @@ def generate_all_clones(
             dir_name = "astatic"
             clone_path = os.path.join(ext_path, dir_name)
         else:
-            dir_name = f'{extension_name + "".join(random.choice(letters) for i in range(21))}-{i}-clone'
+            dir_name = f'{extension_name + "".join(random.choice(letters) for i in range(21))}-{i}-clone'  # pylint:disable=line-too-long
             clone_path = os.path.join(
                 ext_path,
                 dir_name,

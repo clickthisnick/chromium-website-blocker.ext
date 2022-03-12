@@ -9,7 +9,6 @@ BLOCKLISTS = [
     f"{SCRIPTPATH}/../blockLists/blockedDomains.txt",
     f"{SCRIPTPATH}/../blockLists/blockedStartsWithUrl.txt",
     f"{SCRIPTPATH}/../blockLists/regexBlock.txt",
-    f"{SCRIPTPATH}/../blockLists/blockedRequestInitiator.txt",
 ]
 
 
@@ -79,18 +78,6 @@ def decode_all():
                 contents[file].append(
                     f"https://duckduckgo.com/?q={domain_block.split('.')[0]}&"
                 )
-
-        # blockedRequestInitiator add all domains to list
-        if file.endswith("blockedRequestInitiator.txt"):
-            domain_block_list = get_domain_block_list()
-
-            for domain_block in domain_block_list:
-                if domain_block.endswith("\n"):
-                    domain_block = domain_block[:-1]
-                contents[file].append(f"https://www.{domain_block}': 'true")
-                contents[file].append(f"https://m.{domain_block}': 'true")
-                contents[file].append(f"https://{domain_block}': 'true")
-                contents[file].append(f"https://mobile.{domain_block}': 'true")
 
         # write back the values but "encrypted" to the file
         contents_to_write = sorted(set(contents[file]))
